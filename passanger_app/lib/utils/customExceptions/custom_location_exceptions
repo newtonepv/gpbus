@@ -1,0 +1,16 @@
+// Exceções customizadas para localização
+class CustomLocationServiceDisabledException implements Exception {
+  final String message;
+  CustomLocationServiceDisabledException(this.message);
+  
+  @override
+  String toString() => message;
+}
+
+class CustomLocationPermissionDeniedException implements Exception {
+  final String message;
+  CustomLocationPermissionDeniedException(this.message);
+  
+  @override
+  String toString() => message;
+}
