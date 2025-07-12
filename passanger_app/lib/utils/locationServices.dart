@@ -1,5 +1,5 @@
 import 'package:geolocator/geolocator.dart';
-import 'package:tcc_teste/utils/customExceptions/customLocationExceptions';
+import 'package:tcc_teste/utils/customExceptions/custom_location_exceptions';
 
 Future<Position> getCurrentLocation() async {
   bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -7,7 +7,7 @@ Future<Position> getCurrentLocation() async {
   if (!serviceEnabled) {
     throw CustomLocationServiceDisabledException('Habilite a localização.');
   }
-  
+
   LocationPermission permission = await Geolocator.checkPermission();
 
   //Tratamento de erros de permissão:

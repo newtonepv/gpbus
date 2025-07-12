@@ -8,9 +8,9 @@ import 'package:tcc_teste/utils/customExceptions/custom_server_exceptions.dart';
 
 final Dio httpClient = Dio(); 
 
-//const String host = "https://gpbus-psql-python-rest-api.onrender.com";
-//DEBUG
-const String host = "http://0.0.0.0:8000";
+const String host = "https://gpbus-psql-python-rest-api.onrender.com";
+
+//const String host = "http://0.0.0.0:8000";
 Future<List<int>> serverLoadBusIds() async {
   //can return a DioException if its .response.statuscode = 502 the server is full, other exceptions are unexpected
   String url = host+"/busids"; 
