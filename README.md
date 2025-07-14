@@ -1,7 +1,10 @@
 <div align="center">
-  # Gpbus mobile
-  Public transport tracking in real time!
-  <img src="passanger_app/assets/gpbusLogo.png" alt="Logo" width="50%">
+  <img src="passanger_app/assets/gpbusLogo.png" alt="Logo" width="200">
+</div>
+
+<h1 align="center">Gpbus mobile</h1>
+<p align="center">Public transport tracking in real time!</p>
+
   ## Contents
   - [Description](#description)
   <hr>  
