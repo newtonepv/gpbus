@@ -1,10 +1,13 @@
 // ignore_for_file: prefer_interpolation_to_compose_strings
 
 import 'dart:async';
-import 'dart:convert';
+import 'dart:nativewrappers/_internal/vm/lib/ffi_allocation_patch.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:dio/dio.dart';
+import 'package:pegaloc/customExceptions/custom_location_exceptions.dart';
+import 'package:pegaloc/customExceptions/custom_server_exceptions.dart';
+import 'package:pegaloc/utils/server_connection.dart';
 import 'package:pegaloc/widgets/busSearchBar.dart'; 
 import '../widgets/infoTextBox.dart'; 
 import '../main.dart';
@@ -14,7 +17,7 @@ Future<Position> getCurrentLocation() async {
   bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
   //Tratamento de erros de não ativação de localização:
   if (!serviceEnabled) {
-    return Future.error('Habilite a localização.');
+    throw CustomLocationServiceDisabledException('Habilite a localização.');
   }
 
   //Tratamento de erros de permissão:
@@ -23,7 +26,7 @@ Future<Position> getCurrentLocation() async {
   if (deniedPermissions.contains(permission)) {
     permission = await Geolocator.requestPermission();
     if (deniedPermissions.contains(permission)) {
-    return Future.error('As permissões de localização foram negadas, vá para configurações e habilite.');
+    throw CustomLocationPermissionDeniedException('As permissões de localização foram negadas, vá para configurações e habilite.');
     }
   }
 
@@ -34,19 +37,6 @@ Future<Position> getCurrentLocation() async {
 
 
 
-Future<Response> updateBusLocApiRequest(Dio httpClient,CancelToken locationUpdateCompleter, int busid, double newLatitude, double newLongitude, int driverId, String driverPassword ) async{ 
-  String host = "https://gpbus-psql-python-rest-api.onrender.com";
-  return  await httpClient.get(host+'/udtBusLoc/',
-  queryParameters: {
-    'busid': busid.toString(),
-    'latitude': newLatitude.toString(),
-    'longitude': newLongitude.toString(),
-    'idDriver': driverId.toString(),
-    'driverPassword': driverPassword.toString()
-  },
-  cancelToken: locationUpdateCompleter
-  );
-}
 void loadLoginPage({required BuildContext context, String errorMsg=""}){
   
   Navigator.pushReplacement(
@@ -83,8 +73,8 @@ class BusDriverPageBody extends StatefulWidget {
 class BusDriverPageBodyState extends State<BusDriverPageBody> {
   
   SearchController searchController = SearchController();
-  Timer? _timer; // Usado para controlar o intervalo de atualização
-  int busSelected= -1;
+  Timer? _busLocationUpdatingTimer; // Usado para controlar o intervalo de atualização
+  int _busSelectedId= -1;
   late Dio httpClient;
   late CancelToken _locationUpdateToken;
   bool postingLocFlag = false;
@@ -94,6 +84,15 @@ class BusDriverPageBodyState extends State<BusDriverPageBody> {
   String infoTextBoxMessage = "";
   int infoTextBoxColorCode = 0;
   final String erroServidorCheio = "O servidor está cheio, tente novamente mais tarde";
+
+  @override
+  void dispose() {
+    print("rodou o dispose e vai mudar de pagina");
+    _locationUpdateToken.cancel("Parou de publicar a localização");
+    _busLocationUpdatingTimer?.cancel();
+    super.dispose();
+  }
+
   @override
   void initState(){
     super.initState();
@@ -110,61 +109,29 @@ class BusDriverPageBodyState extends State<BusDriverPageBody> {
             );
   }
     
-  bool _handle502DioExceptions(DioException e){
-    if(e.response!=null){
-      if(e.response!.statusCode==502){
-        //deu servidor cheio
-        print("vamos primeiro fechar as corrotinas");
-        _stopPostingLoc();//tentar parar as corrotinas atuais
-        _loadLoginPage(context: context, errorMsg: erroServidorCheio);
-        return true;
-      }
-    }
-    return false;
-  }
 
   Future<void> _loadBusIds(Dio httpClient) async{
     setState(() {isLoadingPageFlag=true;});
     try{
-      print("mandou req http pedindo bus ids");
 
-      String host = "https://gpbus-psql-python-rest-api.onrender.com";
-      final response = await httpClient.get(host+'/busids');
-      print("recebeu bus ids: "+ json.decode(response.data['ids']).toString());
-
+      List<int> recievedIds = await getBusIds(context);
       setState(() {
-        busIdList = List<int>.from(json.decode(response.data['ids']));
+        busIdList = recievedIds;
         isLoadingPageFlag=false;
         });
-    }on DioException catch (e){
-      if(_handle502DioExceptions(e)==false){
-        print("[ERROR] func _loadBusIds: "+e.toString());
-      }
+        
+    }on CustomNavigatedToLoginPageException{
+        //do nothing its loading another page
     }
   }
 
-  Future<void> _updateBusLoc(Dio httpClient, CancelToken locationUpdateCompleter, int busid, double newLatitude, double newLongitude, int driverId, String driverPassword ) async {
-    try{
-      print("mandou req http...");
-      final response = await updateBusLocApiRequest(httpClient,locationUpdateCompleter, busid,newLatitude,newLongitude,driverId,driverPassword);
-      print("response.statusCode: "+response.statusCode.toString());
-      setState(() {
-        infoTextBoxMessage="Movendo o Onibus";
-        infoTextBoxColorCode=1;
-      });
-    }on DioException catch (e){
-      if(_handle502DioExceptions(e)==false){
-        throw e;// passa ela para ser 
-      }
-    } 
-  }
 
   void _stopPostingLoc() {
     print("stopPostingLoc");
     _locationUpdateToken.cancel("Parou de publicar a localização");
     _locationUpdateToken = CancelToken();
-    _timer?.cancel();
-    _timer = null;
+    _busLocationUpdatingTimer?.cancel();
+    _busLocationUpdatingTimer = null;
 
     setState(() {         
       infoTextBoxMessage = "";
@@ -180,30 +147,38 @@ class BusDriverPageBodyState extends State<BusDriverPageBody> {
       infoTextBoxColorCode=0;
     });
     
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+    _busLocationUpdatingTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (!timer.isActive) return;
-      //get the loc
-      late String msg="";
       try{
         Position currentPosition = await getCurrentLocation();
-        await _updateBusLoc(httpClient, _locationUpdateToken, busId, currentPosition.latitude, currentPosition.longitude, widget.driverId, widget.driverPassword);
+        await updateBusLocApiRequest(_locationUpdateToken, _busSelectedId,currentPosition.latitude,currentPosition.longitude,widget.driverId,widget.driverPassword, context);
+        setState(() {
+          infoTextBoxMessage="Movendo o Onibus";
+          infoTextBoxColorCode=1;
+        }); 
       }on DioException catch (e){
         if(e.response?.statusCode==401){
-          msg="Voce não tem permissão para dirigir este onibus";
+          _stopPostingLoc();
+          setState(() {
+            errorMsg="Voce não tem permissão para dirigir este onibus";
+          });
         }else if(e.type == DioExceptionType.cancel){
-          errorMsg=msg;
+          //do nothing, was canceled
         }else{
-          msg= e.toString();
+          rethrow;
         }
+      }on CustomLocationPermissionDeniedException catch (e){
         _stopPostingLoc();
-      }catch (e){
-        msg=e.toString();
-        _stopPostingLoc();
-      }finally{
-        print("erro obtido" + msg);
         setState(() {
-          errorMsg=msg;
+          errorMsg=e.message;
         });
+      }on CustomLocationServiceDisabledException catch (e){
+        _stopPostingLoc();
+        setState(() {
+          errorMsg=e.message;
+        });
+      }on CustomNavigatedToLoginPageException {
+        //do nothing its loading another page
       }
     });
     
@@ -213,7 +188,7 @@ class BusDriverPageBodyState extends State<BusDriverPageBody> {
   void busSelectedCallback(int bus){
     print("selecionou: "+bus.toString());
     setState(() {
-      busSelected=bus;
+      _busSelectedId=bus;
     });
   }
   @override
@@ -247,12 +222,12 @@ class BusDriverPageBodyState extends State<BusDriverPageBody> {
       children: [
         BusSearchBar(busIds:busIdList,onBusSelected: busSelectedCallback, hintText: 'Escolha o ônibus que quer dirigir',),
         const SizedBox(height: 20),//padding
-        if(busSelected != -1)
+        if(_busSelectedId != -1)
           // ...existing code...
           ElevatedButton(
             onPressed: () {
               if(!postingLocFlag){
-                _startPostingLoc(busSelected);
+                _startPostingLoc(_busSelectedId);
               }else{
                 _stopPostingLoc();
               }

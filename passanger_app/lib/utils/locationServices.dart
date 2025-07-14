@@ -1,5 +1,5 @@
 import 'package:geolocator/geolocator.dart';
-import 'package:tcc_teste/utils/customExceptions/custom_location_exceptions';
+import 'package:tcc_teste/utils/customExceptions/custom_location_exceptions.dart';
 
 Future<Position> getCurrentLocation() async {
   bool serviceEnabled = await Geolocator.isLocationServiceEnabled();

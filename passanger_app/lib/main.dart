@@ -30,7 +30,6 @@ class MyApp extends StatelessWidget {
         '/login': (_) => const LoginPage(),
         '/cadastro': (_) => const CreateAccount(),
         '/esqueceu': (_) => const EsqueceuPage(),
-        '/inicio': (_) => const HomePage(),
         '/config': (_) => const ConfigPage(),
         '/busbucks':(_) => const BusBucks(),
         'alarme':(_) => AlarmPage(),

@@ -47,7 +47,11 @@ Widget mapBuilder({List<List<double>>? route, List<double>? busLocationParam, bo
     );  
   }
 
-  if(focusUser==true&&userLocation.isNotEmpty){mapController.move(LatLng(userLocation[0],userLocation[1]), 16);}
-  if(focusBus==true&&busLocation.isNotEmpty){mapController.move(LatLng(busLocation[0],busLocation[1]), 16);}
-  return Map(mapController: mapController, markers:markers, points: points);
+  if(focusUser==true&&userLocation.isNotEmpty){
+    mapController.move(LatLng(userLocation[0],userLocation[1]), 16);
+  }
+  if(focusBus==true&&busLocation.isNotEmpty){
+    mapController.move(LatLng(busLocation[0],busLocation[1]), 16);
+  }
+  return MapWidget(mapController: mapController, markers:markers, points: points);
   }

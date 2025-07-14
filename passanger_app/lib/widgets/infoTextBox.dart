@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 
-Widget? infoTextBox(String error_msg, int text_code){
+Widget? infoTextBoxBuilder(String error_msg, int text_code){
   //text_code = -1 for red, 0 for blue, and 1 for green message
   Color textBoxColor = Colors.black;
   switch (text_code){

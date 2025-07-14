@@ -1,4 +1,10 @@
+// ignore_for_file: await_only_futures
+
 import 'package:flutter/material.dart';
+import 'package:tcc_teste/utils/customExceptions/custom_server_exceptions.dart';
+import 'package:tcc_teste/utils/server_requests.dart';
+import 'package:tcc_teste/utils/string_autentications.dart';
+import 'package:tcc_teste/widgets/infoTextBox.dart';
 
 class CreateAccount extends StatefulWidget {
   const CreateAccount({Key? key}) : super(key: key);
@@ -8,6 +14,18 @@ class CreateAccount extends StatefulWidget {
 }
 
 class _CreateAccountState extends State<CreateAccount> {
+  final _userNameController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _userNameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  String _infoTextMsg="";
+  int _infoTextCode=0;
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -29,9 +47,6 @@ class _CreateAccountState extends State<CreateAccount> {
     );
   }
 
-  void _logica_cadastrar() {
-    
-  }
 
   _header(context) {
     return const Column(
@@ -56,8 +71,9 @@ class _CreateAccountState extends State<CreateAccount> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         TextField(
+          controller: _userNameController,
           decoration: InputDecoration(
-              hintText: "Nome completo",
+              hintText: "Nome da conta",
               border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(18),
                   borderSide: BorderSide.none),
@@ -70,22 +86,9 @@ class _CreateAccountState extends State<CreateAccount> {
         ),
         const SizedBox(height: 10),
         TextField(
+          controller: _passwordController,
           decoration: InputDecoration(
-              hintText: "E-mail",
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(18),
-                  borderSide: BorderSide.none),
-              fillColor: const Color(0xFFffc966).withOpacity(0.1),
-              filled: true,
-              prefixIcon: const Icon(
-                Icons.mail,
-                color: Color(0xFFffc966),
-              )),
-        ),
-        const SizedBox(height: 10),
-        TextField(
-          decoration: InputDecoration(
-              hintText: "Senha",
+              hintText: "Senha da conta",
               border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(18),
                   borderSide: BorderSide.none),
@@ -99,8 +102,32 @@ class _CreateAccountState extends State<CreateAccount> {
         ),
         const SizedBox(height: 10),
         ElevatedButton(
-          onPressed: () {
-            _logica_cadastrar();
+          onPressed: () async{
+            setState(() {
+              _infoTextMsg="Criando conta...";
+              _infoTextCode=0;
+            });
+            if(filters(_userNameController.text, _passwordController.text)==false){
+              setState(() {
+                _infoTextMsg="Não use caracteres especiais nem deixe em branco";
+                _infoTextCode=-1;
+              });
+              return;
+            }
+            try{
+              await createUser(_userNameController.text, _passwordController.text,context);
+              setState(() {
+                _infoTextMsg="Conta criada com sucesso";
+                _infoTextCode=1;
+              });
+            }on Custom409Exception  catch (e){
+              setState(() {
+                _infoTextMsg=e.toString();
+                _infoTextCode=-1;
+              });
+            }on CustomNavigatedToLoginPageException{
+              //do nothing
+            }
           },
           style: ElevatedButton.styleFrom(
             shape: const StadiumBorder(),
@@ -111,7 +138,9 @@ class _CreateAccountState extends State<CreateAccount> {
             "Cadastrar",
             style: TextStyle(fontSize: 20),
           ),
-        )
+        ),
+        const SizedBox(height: 10),
+        if (infoTextBoxBuilder(_infoTextMsg,_infoTextCode) != null)infoTextBoxBuilder(_infoTextMsg,_infoTextCode)!
       ],
     );
   }

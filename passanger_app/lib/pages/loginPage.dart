@@ -4,6 +4,7 @@ import 'package:tcc_teste/pages/esqueceu_page.dart';
 import 'package:tcc_teste/pages/homePage/homePage.dart';
 import 'package:tcc_teste/utils/customExceptions/custom_server_exceptions.dart';
 import 'package:tcc_teste/utils/server_requests.dart';
+import 'package:tcc_teste/utils/string_autentications.dart';
 import 'package:tcc_teste/widgets/infoTextBox.dart';
 
 class LoginPage extends StatefulWidget {
@@ -18,6 +19,15 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   String errorMsg="";
   bool _isloading= false;
+  final TextEditingController _userNameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _userNameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override void initState() {
     errorMsg=widget.errorMsg;
@@ -61,10 +71,6 @@ class _LoginPageState extends State<LoginPage> {
       ],
     );
   }
-
-  final TextEditingController _userNameController = TextEditingController();
-
-  final TextEditingController _passwordController = TextEditingController();
 
   _form(context) {
     return SizedBox(
@@ -112,21 +118,26 @@ class _LoginPageState extends State<LoginPage> {
                 });
                 String userName = _userNameController.text.trim();
                 String password = _passwordController.text.trim();
+                if(filters(userName,password)==false){
+                  setState(() {
+                    errorMsg = "Usuário ou senha incorretos. Tente novamente. \nVerifique maiúsculas e não use caracteres especiais";
+                    _isloading=false;
+                  });
+                  return;
+                }
                 //DEBUG 
                 try{
-                  bool hasAccess = await autenticateUser(userName,password);
+                  bool hasAccess = await autenticateUser(userName,password, context);
                   if(hasAccess){
                     Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => const HomePage()));
+                    MaterialPageRoute(builder: (context) => HomePage(userName:userName,password: password)));
                   }else {
                     setState(() {
                       errorMsg = "Usuário ou senha incorretos. Tente novamente.";
                     });
                   }
-                }on CustomServerFullException catch (e) {
-                  setState(() {
-                      errorMsg = e.toString();
-                  });
+                }on CustomNavigatedToLoginPageException catch (e) {
+                  //do nothing
                 }
                 
                 setState(() {
@@ -141,7 +152,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             child: buttonContentBuilder(_isloading, const Color.fromARGB(255, 0, 0, 0))
           ),
-          if(infoTextBox(errorMsg, -1)!=null)infoTextBox(errorMsg , -1)!
+          if(infoTextBoxBuilder(errorMsg, -1)!=null)infoTextBoxBuilder(errorMsg , -1)!
         ],
       ),
     );

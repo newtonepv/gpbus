@@ -2,21 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
-class Map extends StatefulWidget {
+
+
+
+class MapWidget extends StatefulWidget {
   
 
-  const Map({super.key, required this.mapController, required this.markers, required this.points});
+  const MapWidget({super.key, required this.mapController, required this.markers, required this.points});
   final List<Marker> markers;
   final List<LatLng> points;
   final MapController mapController;
   static bool mostralot = false;
   
+  static const MapOptions mapHardCodedInitialValue = MapOptions( 
+    // centro do mapa e zoom inicial
+    initialZoom: 15.0,
+    initialCenter: LatLng(-23.587489, -46.682300), 
+  );
+
   @override
-  State<Map> createState() => _MapState();
+  State<MapWidget> createState() => _MapWidgetState();
   
 }
 
-class _MapState extends State<Map> {
+class _MapWidgetState extends State<MapWidget> {
+  
 @override
 void initState() {
   super.initState();
@@ -27,10 +37,7 @@ void initState() {
     return FlutterMap(
       mapController: widget.mapController,
 
-      options: const MapOptions( // centro do mapa
-        initialZoom: 15.0,
-        initialCenter: LatLng(2, 2), // nível de zoom inicial
-      ),
+      options: MapWidget.mapHardCodedInitialValue,
 
       children: [
         

@@ -6,11 +6,15 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:tcc_teste/pages/homePage/widgets/bus_comments.dart';
 import 'package:tcc_teste/pages/homePage/widgets/mapBuilder.dart';
 import 'package:tcc_teste/pages/homePage/widgets/loadingPage.dart';
 import 'package:tcc_teste/pages/homePage/widgets/homeBottomNavigationBar.dart';
 import 'package:tcc_teste/pages/homePage/widgets/menu.dart';
+import 'package:tcc_teste/pages/homePage/widgets/moove_bus_200.dart';
 import 'package:tcc_teste/utils/changingPageFunctions.dart';
+import 'package:tcc_teste/utils/customExceptions/custom_location_exceptions.dart';
+import 'package:tcc_teste/utils/customExceptions/custom_server_exceptions.dart';
 import 'package:tcc_teste/utils/locationServices.dart';
 import 'package:tcc_teste/utils/server_requests.dart';
 import 'package:tcc_teste/pages/homePage/widgets/busSearchBar.dart';
@@ -18,12 +22,15 @@ import 'package:tcc_teste/widgets/infoTextBox.dart';
 
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final String userName;
+  final String password;
+  const HomePage({super.key, required this.userName, required this.password});
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  late String _userName;
   List<int> _busIds = []; 
   MapController _mapController = MapController();
   SearchController _searchController = SearchController();
@@ -34,20 +41,37 @@ class _HomePageState extends State<HomePage> {
   CancelToken _busLocationLoadCancelToken = CancelToken();
   //whenever i make a update about the map, i want to set this both to false
   bool _focusBusLocation = false;
-  bool _focusUserLocation = true;
+  bool _focusUserLocation = false;
 
   String _busRelatedMessage='';
   int _infoMessageCode=0;
   String _locationRelatedMessage= '';
   int _locationRelatedMessageCode=0;
-
+  bool _showCenterWidget = false;
+  int _busId = -1;
+  
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _timer?.cancel(); // Stop getting the bus locaiton
+    _busLocationLoadCancelToken.cancel("Canceled Request");
+    _mapController.dispose();
+    super.dispose();
+  }
+  @override
+  void initState() {
+    super.initState();
+    _userName=widget.userName;
+    _loadBusIds();
+  }
 
 
   void _startGettingBusCoordinates(int busid) async {
     _timer?.cancel(); // Cancelar o temporizador existente
     _busLocationLoadCancelToken.cancel("Canceled Request");
     _busLocationLoadCancelToken = CancelToken();
-    bool _isFirstTimeLoadingMapWithThisBus=true;
+
+    bool isFirstTimeLoadingMapWithThisBus=true;//used to focus the bus only in the first map update
     setState(() {
       _busRelatedMessage = "Obtendo ônibus do servidor";
       _infoMessageCode=0;
@@ -56,8 +80,8 @@ class _HomePageState extends State<HomePage> {
     const interval = Duration(seconds: 1);
     _timer = Timer.periodic(interval, (timer) async {
       try{
-        List<double> newBusLocation = await getBusLocation(_busLocationLoadCancelToken, busid);
-        List<List<double>> newBusRoute = await getBusRoute(_busLocationLoadCancelToken, busid);
+        List<double> newBusLocation = await getBusLocation(_busLocationLoadCancelToken, busid,context);
+        List<List<double>> newBusRoute = await getBusRoute(_busLocationLoadCancelToken, busid,context);
         
         setState(() {
           if(_busRelatedMessage.isNotEmpty){
@@ -66,65 +90,33 @@ class _HomePageState extends State<HomePage> {
           _busRoute = newBusRoute;
           _busLocation = newBusLocation;
           _focusUserLocation = false;
-          _focusBusLocation = _isFirstTimeLoadingMapWithThisBus;
+          _focusBusLocation = isFirstTimeLoadingMapWithThisBus;
         });
-        _isFirstTimeLoadingMapWithThisBus=false;
+        isFirstTimeLoadingMapWithThisBus=false;
         
       }on DioException catch (e){
         //handle full server
         if(e.type==DioExceptionType.cancel){
-          //if this req was canceled, then lets do nothing
+          //if the request is canceled, nothing happens
+        }else{
+          rethrow;
         }
-        if(_handle502DioExceptions(e)==false){
-          throw e;
-        }
+      }on CustomNavigatedToLoginPageException{
+        //do nothing as well
       }
-      
-      //error handling etc
-      
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _loadBusIds();
-  }
-  
-  bool _handle502DioExceptions(DioException e){
-    if(e.response!=null){
-      if(e.response!.statusCode==502){
-        //full server
-        //try to close coroutines
-        loadLoginPage(context: context, errorMsg: "O servidor está cheio, tente novamente mais tarde");
-        return true;
-      }
-    }
-    return false;
-  }
 
   Future<void> _loadBusIds() async {
     try{
-      final List<int> newbusIds=await serverLoadBusIds();
+      final List<int> newbusIds=await serverLoadBusIds(context);
       setState(() {
         _busIds=newbusIds;
       });
-    }on DioException catch (e){
-      if(_handle502DioExceptions(e)==false){// if it is not a 502 error, dont catch it
-        print("[ERROR] " + e.toString());
-        throw e;
-      }
-    }on Exception catch (e){
-      print("[ERROR] " + e.toString());
-      throw e;
+    }on CustomNavigatedToLoginPageException{
+      //do nothing if it navigated to another page
     }
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    _timer?.cancel(); // Cancelar o timer ao sair da tela
-    super.dispose();
   }
 
   @override
@@ -151,6 +143,9 @@ class _HomePageState extends State<HomePage> {
             child: BusSearchBar(
               busIds: _busIds,
               onBusSelected: (int busIdSelected){
+                setState(() {
+                  _busId=busIdSelected;
+                });
                 _startGettingBusCoordinates(busIdSelected);
               },
               hintText: "digite uma linha de onibus...")
@@ -166,28 +161,61 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
-        body: 
-        Stack( 
-        children:[ 
-          Positioned.fill(
-            child:
-              SizedBox(
-                height: 525,
-                width: 600,
-                child:mapBuilder(userLocationParam: _userLocation,focusUser: _focusUserLocation,busLocationParam: _busLocation, focusBus: _focusBusLocation, mapController: _mapController, route: _busRoute),
+        body: Stack( 
+          children:[ 
+            Positioned.fill(
+              child:
+                SizedBox(
+                  height: 525,
+                  width: 600,
+                  child:mapBuilder(userLocationParam: _userLocation,focusUser: _focusUserLocation,busLocationParam: _busLocation, focusBus: _focusBusLocation, mapController: _mapController, route: _busRoute),
+                ),
+            ),
+            Positioned(
+              bottom: 16,
+              right: 16,
+              child: Column(
+                children: [
+                  if(infoTextBoxBuilder(_locationRelatedMessage, _locationRelatedMessageCode)!= null)infoTextBoxBuilder(_locationRelatedMessage, _locationRelatedMessageCode)!,
+                  if(infoTextBoxBuilder(_busRelatedMessage, _infoMessageCode)!= null)infoTextBoxBuilder(_busRelatedMessage, _infoMessageCode)!,
+                  MoveBus200Button(),
+                ],
+              ) 
+            ),
+            if(_busLocation.isNotEmpty) 
+              Positioned(
+                bottom: 16,
+                left: 16,
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 247, 180, 80),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: IconButton(
+                    icon: Icon(Icons.comment, color: Colors.black),
+                    onPressed: () {
+                      setState(() {
+                        _showCenterWidget=true;
+                      });
+                    },
+                  ),
+                ),
               ),
-          ),
-          Positioned(
-            bottom: 16,
-            right: 16,
-            child: Column(
-              children: [
-                if(infoTextBox(_locationRelatedMessage, _locationRelatedMessageCode)!= null)infoTextBox(_locationRelatedMessage, _locationRelatedMessageCode)!,
-                if(infoTextBox(_busRelatedMessage, _infoMessageCode)!= null)infoTextBox(_busRelatedMessage, _infoMessageCode)!
-              ],
-            ) 
-          )
-        ],),
+            if (_showCenterWidget)
+            Comments(
+              onCloseWidgetPressed: () {
+                setState(() {
+                  _showCenterWidget = false;
+                });
+              },
+              busId: _busId,
+              userName: _userName,
+              password: widget.password,
+            )
+          ],
+        ),
         bottomNavigationBar: HomePageBottomNavigationBar(
           onLocationIconTapped: () async {
             if(_userLocation.isEmpty) {
@@ -206,13 +234,17 @@ class _HomePageState extends State<HomePage> {
                   _focusUserLocation = true;
                   _userLocation = newUserLocation;
                 });
-              }on Exception catch (e){
+              }on CustomLocationPermissionDeniedException catch (e){
                 setState(() {
                 _locationRelatedMessage = e.toString();
                 _locationRelatedMessageCode = -1;
                 });
-              } 
-              
+              }on CustomLocationServiceDisabledException catch (e){
+                setState(() {
+                _locationRelatedMessage = e.toString();
+                _locationRelatedMessageCode = -1;
+                });
+              }
             }else{
               setState(() {
                 _focusUserLocation=false;
@@ -239,8 +271,5 @@ class _HomePageState extends State<HomePage> {
 
   
 }
-
-
-
 
 
