@@ -20,7 +20,7 @@ This two mobile apps objective is:
 The following image is a diagram that shows the interaction between the two mobile apps and the api (the api repository its:[api](https://github.com/newtonepv/gpbus_api))
 
 <div align="center">
-  <img src="readme_images/diagram.png" alt="Logo" width="200">
+  <img src="readme_images/diagram.png" alt="Logo" width="900">
 </div>
 
 <hr>
