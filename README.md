@@ -18,7 +18,7 @@ This two mobile apps objective is:
 <hr>
 
 ## Installing and running  
-Ceck the README.md inside each app directory to know how to install each one.
+Ceck the README.md inside each app directory to know how to install both.
 <hr>
 
 ## License
