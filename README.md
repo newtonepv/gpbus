@@ -19,7 +19,7 @@ This two mobile apps objective is:
 - Share comments about the buses.
 The following image is a diagram that shows the interaction between the two mobile apps and the api (the api repository its:[api](https://github.com/newtonepv/gpbus_api))
 <p align="center" style="margin: 0; padding: 0;">
-  <img src="readme_images/diagram.png" alt="Logo" alt="Logo" width="1000">
+  <img src="readme_images/diagram.png" alt="diagram" width="1000">
 </p>
 
 ## Installing and running  
