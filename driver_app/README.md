@@ -14,6 +14,10 @@ This is an app made with the objective of:
 
 <hr>
 
+## How to drive a bus
+The only driver account avaliable for all users id is "2", wich means that the only drivable bus is the bus number 201. The password for this account is "3427yr".
+<hr>
+
 ## Features
 ### Login page
 - Driver autentication.
@@ -25,7 +29,9 @@ This is an app made with the objective of:
 ### Database level
 Buses and drivers have a many-to-many relation, becouse each driver is assigned to drive a group of buses and each bus is assigned to be driven by a group of drivers, here is an image of the busassigment relational table.
 
-
+<p align="center" style="margin: 0; padding: 0;">
+  <img src="../readme_images/bus_driver_assignment.jpeg" alt="Logo" alt="bus_assignment.jpeg" width="1000">
+</p>
 
 <hr>
 
@@ -55,4 +61,3 @@ Buses and drivers have a many-to-many relation, becouse each driver is assigned 
   ```bash
   flutter run -d chrome
   ```
-## How to drive a bus
