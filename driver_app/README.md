@@ -25,7 +25,9 @@ This is an app made with the objective of:
 ### Database level
 Buses and drivers have a many-to-many relation, becouse each driver is assigned to drive a group of buses and each bus is assigned to be driven by a group of drivers, here is an image of the busassigment relational table.
 
-
+<p align="center" style="margin: 0; padding: 0;">
+  <img src="../readme_images/bus_assignment.jpeg" alt="Logo" alt="bus_assignment.jpeg" width="1000">
+</p>
 
 <hr>
 
