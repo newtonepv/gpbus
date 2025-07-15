@@ -7,7 +7,9 @@
 
 ## Contents
 - [Description](#description)
+- [Installing and running](#installing-and-running)
 - [License](#license)
+- [Contacts](#contacts)
 <hr>
 
 ## Description  
@@ -24,3 +26,7 @@ Ceck the README.md inside each app directory to know how to install both.
 ## License
 This project is open for educational and practicing purposes.  
 The commercial usage is initially forbidden, [contact me](#contacts) to discuss terms.
+
+## Contacts
+- LinkedIn: [linkedin.com/in/newtonepv](https://linkedin.com/in/newtonepv)
+- Email: [newtonepv@gmail.com](mailto:newtonepv@gmail.com)
