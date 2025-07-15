@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="passanger_app/assets/gpbusLogo.png" alt="Logo" width="200">
+  <img src="readme_images/gpbusLogo.png" alt="Logo" width="200">
 </div>
 
 <h1 align="center">Gpbus mobile</h1>
@@ -17,6 +17,12 @@ This two mobile apps objective is:
 - Store the location of buses in a postgreSQL database.
 - Show the location of buses in a mobile app in real time.
 - Share comments about the buses.
+The following image is a diagram that shows the interaction between the two mobile apps and the api (the api repository its:[api](https://github.com/newtonepv/gpbus_api))
+
+<div align="center">
+  <img src="readme_images/diagram.png" alt="Logo" width="200">
+</div>
+
 <hr>
 
 ## Installing and running  
