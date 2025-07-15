@@ -1,4 +1,4 @@
-# GPBus for passangers
+# GPBus for passengers
 
 ## Description
 This is an app made with the objective of: 
@@ -9,15 +9,15 @@ This is an app made with the objective of:
 
 ## Features
 ### Login page
-- User autentication.
+- User authentication.
 ### Register page
 - User creation.
 ### Home page
-- Map for locations visualization
+- Map for location visualization
 - Bus selection
 - Selected bus route visualization in the map.
 - Selected bus position visualization in the map.
-- Mooving bus nº200.\n 
+- Moving bus nº200.\n 
 Updating buses location is normally only allowed for drivers (using the driver_app) but, since this makes the
 previous feature depend on the someone using the driver_app to moove the selected bus, we decided to make a button that,
 when pressed, makes the bus nº200 moove following the route designed to it. The following image indicates with an arrow
@@ -29,27 +29,27 @@ when pressed, makes the bus nº200 moove following the route designed to it. The
 
 - User localization in the map.
 - Bus selection.
-- Bus comments visualization, rating and submiting.
+- Bus comments visualization, rating and submission.
 
 <hr>
 
-## Pending Features
+## Pending features
 - Running on mobile emulator.
 - Language selection (only portuguese for now).
-- Alarms for when a selected bus passes by a selected region.
+- Alerts for when a selected bus passes by a selected region.
 - User password recovery by email.
-- Gamefication.
+- Gamification.
 - Dark mode.
 - Favorite buses.
 
 <hr>
 
-## Installing & Running
-### Pre-requisites
+## Installing & running
+### Prerequisites
 (Do not require android studio).
 - Flutter & Dart (SDK) version higher than 3.0.0
 - Chrome browser.
-### Installling Steps
+### Installling steps
 - Clone the repository:
   ```bash
   git clone https://github.com/newtonepv/gpbus_mobile.git
@@ -60,7 +60,7 @@ when pressed, makes the bus nº200 moove following the route designed to it. The
   cd passanger_app
   flutter pub get
   ```
-### Running Steps
+### Running steps
 - Run the app on chrome:
   ```bash
   flutter run -d chrome
