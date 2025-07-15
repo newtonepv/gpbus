@@ -35,6 +35,7 @@ Buses and drivers have a many-to-many relationship, because each driver is assig
 <hr>
 
 ## Pending features
+- Language selection (only brazilian portuguese for now).
 - Running on mobile emulator.
 
 <hr>
