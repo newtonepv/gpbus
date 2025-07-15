@@ -24,7 +24,7 @@ This is an app made with the objective of:
 <hr>
 
 ## Pending Features
-Recomend more fetures please 😀
+- Running on mobile emulator.
 
 <hr>
 
