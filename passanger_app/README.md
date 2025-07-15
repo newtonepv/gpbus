@@ -5,6 +5,8 @@ This is an app made with the objective of:
 - Tracking public buses in real time.
 - Reading, making and rating comments about public buses.
 
+<hr>
+
 ## Features
 ### Login page
 - User autentication.
@@ -22,6 +24,8 @@ previous feature depend on the someone using the driver_app
 - Bus selection.
 - Bus comments visualization, rating and submiting.
 
+<hr>
+
 ## Pending Features
 - Running on mobile emulator.
 - Language selection (only portuguese for now).
@@ -30,6 +34,8 @@ previous feature depend on the someone using the driver_app
 - Gamefication.
 - Dark mode.
 - Favorite buses.
+
+<hr>
 
 ## Installing & Running
 ### Pre-requisites
