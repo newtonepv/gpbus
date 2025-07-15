@@ -8,21 +8,12 @@ This is an app made with the objective of:
 ### Login page
 - Driver autentication.
 ### Home page
-- Map for locations visualization
-- User localization in the map.
 - Bus selection.
-- Bus route visualization in the map.
-- Bus position visualization in the map.
-- Bus comments visualization, rating and submiting.
+- Driver localization.
+- Updating bus position.
 
 ## Pending Features
-- Running on mobile emulator.
-- Language selection (only portuguese for now).
-- Alarms for when a selected bus passes by a selected region.
-- User password recovery by email.
-- Gamefication.
-- Dark mode.
-- Favorite buses.
+Recomend more fetures please 😀
 
 ## Installing & Running
 ### Pre-requisites
@@ -37,7 +28,7 @@ This is an app made with the objective of:
   ```
 - Install dependencies:
   ```bash
-  cd passanger_app
+  cd driver_app
   flutter pub get
   ```
 ### Running Steps
