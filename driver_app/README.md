@@ -4,6 +4,15 @@
 This is an app made with the objective of: 
 - Updating public buses locations in real time.
 
+<hr>
+
+## Contents
+- [Features](#features)
+- [Pending Features](#pending-features)
+- [Installing & Running](#installing-and-running)
+
+<hr>
+
 ## Features
 ### Login page
 - Driver autentication.
@@ -12,10 +21,14 @@ This is an app made with the objective of:
 - Driver localization.
 - Updating bus position.
 
+<hr>
+
 ## Pending Features
 Recomend more fetures please 😀
 
-## Installing & Running
+<hr>
+
+## Installing and Running
 ### Pre-requisites
 (Do not require android studio).
 - Flutter & Dart (SDK) version higher than 3.0.0
