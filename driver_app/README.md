@@ -58,3 +58,4 @@ Buses and drivers have a many-to-many relation, becouse each driver is assigned 
   flutter run -d chrome
   ```
 ## How to drive a bus
+The only avaliable driver account is the one with the id 2, wich means that the only drivable bus is the bus 201. The password for this account is "3427yr".
