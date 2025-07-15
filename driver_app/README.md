@@ -7,6 +7,7 @@ This is an app made with the objective of:
 <hr>
 
 ## Contents
+- [How to drive a bus](#how-to-drive-a-bus).
 - [Features](#features)
 - [Pending Features](#pending-features)
 - [Installing & Running](#installing-and-running)
@@ -20,6 +21,11 @@ This is an app made with the objective of:
 - Bus selection.
 - Driver localization.
 - Updating bus position.
+- Bus and driver assignments
+### Database level
+Buses and drivers have a many-to-many relation, becouse each driver is assigned to drive a group of buses and each bus is assigned to be driven by a group of drivers, here is an image of the busassigment relational table.
+
+
 
 <hr>
 
@@ -49,3 +55,4 @@ This is an app made with the objective of:
   ```bash
   flutter run -d chrome
   ```
+## How to drive a bus

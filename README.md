@@ -18,12 +18,9 @@ This two mobile apps objective is:
 - Show the location of buses in a mobile app in real time.
 - Share comments about the buses.
 The following image is a diagram that shows the interaction between the two mobile apps and the api (the api repository its:[api](https://github.com/newtonepv/gpbus_api))
-
-<div align="center">
-  <img src="readme_images/diagram.png" alt="Logo" width="200">
-</div>
-
-<hr>
+<p align="center" style="margin: 0; padding: 0;">
+  <img src="readme_images/diagram.png" alt="Logo" alt="Logo" width="1000">
+</p>
 
 ## Installing and running  
 Ceck the README.md inside each app directory to know how to install both.
