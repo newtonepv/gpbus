@@ -23,8 +23,8 @@ previous feature depend on the someone using the driver_app to moove the selecte
 when pressed, makes the bus nº200 moove following the route designed to it. The following image indicates with an arrow
  where is that button in the home page:
 
-<p>
-  <img url="../readme_images/moove_bus_200.jpeg" alt="moove bus 200 button ilustration">
+<p align="center" style="margin: 0; padding: 0;">
+  <img src="../readme_images/moove_bus_200.jpeg" alt="moove bus 200 button ilustration" width="400">
 </p>
 
 - User localization in the map.
