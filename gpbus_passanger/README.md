@@ -34,7 +34,6 @@ when pressed, makes the bus nº200 moove following the route designed to it. The
 <hr>
 
 ## Pending features
-- Running on mobile emulator.
 - Language selection (only portuguese for now).
 - Alerts for when a selected bus passes by a selected region.
 - User password recovery by email.
@@ -47,7 +46,7 @@ when pressed, makes the bus nº200 moove following the route designed to it. The
 ## Installing & running
 ### Prerequisites
 (Do not require android studio).
-- Flutter & Dart (SDK) version higher than 3.0.0
+- Flutter & Dart (SDK) version higher than 3.0.0.
 - Chrome browser.
 ### Installling steps
 - Clone the repository:
@@ -61,7 +60,20 @@ when pressed, makes the bus nº200 moove following the route designed to it. The
   flutter pub get
   ```
 ### Running steps
-- Run the app on chrome:
-  ```bash
-  flutter run -d chrome
+#### Running the app on chrome:
+ ```bash
+ flutter run -d chrome
+ ```
+#### Enablnig the app to run on a Android device:
+- Enable developer mode.
+- Enable USB Debugging.
+- Connect via USB.
+
+#### Enablnig the app to run on a IOS device:
+- Connect via USB or wireless.
+- Trust developer certificate.
+
+#### Running the app:
+```bash
+  flutter run
   ```
