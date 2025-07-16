@@ -36,7 +36,6 @@ Buses and drivers have a many-to-many relationship, because each driver is assig
 
 ## Pending features
 - Language selection (only brazilian portuguese for now).
-- Running on mobile emulator.
 
 <hr>
 
@@ -57,7 +56,20 @@ Buses and drivers have a many-to-many relationship, because each driver is assig
   flutter pub get
   ```
 ### Running steps
-- Run the app on chrome:
-  ```bash
-  flutter run -d chrome
+#### Running the app on chrome:
+ ```bash
+ flutter run -d chrome
+ ```
+#### Enablnig the app to run on a Android device:
+- Enable developer mode.
+- Enable USB Debugging.
+- Connect via USB.
+
+#### Enablnig the app to run on a IOS device:
+- Connect via USB or wireless.
+- Trust developer certificate.
+
+#### Running the app on mobile device:
+```bash
+  flutter run
   ```
