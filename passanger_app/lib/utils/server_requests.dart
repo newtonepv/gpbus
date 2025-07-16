@@ -30,9 +30,9 @@ void handleServerFullError(DioException e, BuildContext context){
 
 Future<List<int>> serverLoadBusIds(BuildContext context) async {
   //can return a DioException if its .response.statuscode = 502 the server is full, other exceptions are unexpected
-  String url = host+"/busids";
+  String path = host+"/busids";
   try{
-    var response = await httpClient.get(host+"/busids");
+    var response = await httpClient.get(path);
     return  List<int>.from(json.decode(response.data['ids']));
   }on DioException catch (e){
     handleConnectionError(e,context);
