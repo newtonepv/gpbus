@@ -56,7 +56,7 @@ when pressed, makes the bus nº200 moove following the route designed to it. The
   ```
 - Install dependencies:
   ```bash
-  cd passanger_app
+  cd gpbus_passanger
   flutter pub get
   ```
 ### Running steps
