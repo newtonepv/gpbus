@@ -73,7 +73,7 @@ when pressed, makes the bus nº200 moove following the route designed to it. The
 - Connect via USB or wireless.
 - Trust developer certificate.
 
-#### Running the app:
+#### Running the app on mobile device:
 ```bash
   flutter run
   ```
