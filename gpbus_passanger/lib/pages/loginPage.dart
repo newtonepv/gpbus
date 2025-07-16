@@ -59,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
     return const Column(
       children: [
         Text(
-          "GPbuS",
+          "GPbus",
           style: TextStyle(
               fontSize: 40,
               fontWeight: FontWeight.bold,
