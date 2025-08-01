@@ -8,5 +8,5 @@
 <hr>
 
 This is a project has 2 divisions: 
-- The mobile apps made in Flutter (inside the "gpbus_mobile_apps" folder).
-- The desktop app made in .NET (C#) (inside the "gpbus_desktop" folder).
+- The mobile apps made in Flutter (inside the "gpbus_mobile_apps" folder) with its own README.md.
+- The desktop app made in .NET (C#) (inside the "gpbus_desktop" folder) with its own README.md.
