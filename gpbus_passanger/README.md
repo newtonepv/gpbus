@@ -9,7 +9,7 @@ This is an app made with the objective of:
 
 ## Features
 ### Login page
-- User authentication.
+- User authentication (do not use a password you frequently use on other websites).
 ### Register page
 - User creation.
 ### Home page
