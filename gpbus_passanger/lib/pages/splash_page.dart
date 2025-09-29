@@ -39,7 +39,7 @@ class SplashPage extends StatelessWidget {
                     child: FittedBox(
                       fit: BoxFit.contain,
                       child: Image.asset(
-                        'assets/splashScreen/splashDois.png',
+                        'assets/gpbusLogo.png',
                       ),
                     ),
                   ),
