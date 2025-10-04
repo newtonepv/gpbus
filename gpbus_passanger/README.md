@@ -13,29 +13,22 @@ This is an app made with the objective of:
 ### Register page
 - User creation.
 ### Home page
-- Map for location visualization
-- Bus selection
-- Selected bus route visualization in the map.
-- Selected bus position visualization in the map.
-- Moving bus nº200.\n 
-Updating buses location is normally only allowed for drivers (using the driver_app) but, since this makes the
-previous feature depend on the someone using the driver_app to moove the selected bus, we decided to make a button that,
-when pressed, makes the bus nº200 moove following the route designed to it. The following image indicates with an arrow
- where is that button in the home page:
-
+- View an interactive map for visualizing bus routes and locations.
+- Select a specific bus to see its designated route and track its real-time position.
+- See your current location displayed on the map.
+- Bus comments visualization, rating and submission.
+- Simulate bus movement for demonstration purposes. A dedicated button allows you to move bus #200 along its route, which is useful for testing the tracking feature without the driver application. That button is in this part of the page:
 <p align="center" style="margin: 0; padding: 0;">
   <img src="../readme_images/moove_bus_200.jpeg" alt="moove bus 200 button ilustration" width="400">
 </p>
 
-- User localization in the map.
-- Bus selection.
-- Bus comments visualization, rating and submission.
+### Alarm Features
+- Create custom alarms to receive a notification when a specific bus enters a user-defined area on the map.
 
 <hr>
 
 ## Pending features
 - Language selection (only portuguese for now).
-- Alerts for when a selected bus passes by a selected region.
 - User password recovery by email.
 - Gamification.
 - Dark mode.
