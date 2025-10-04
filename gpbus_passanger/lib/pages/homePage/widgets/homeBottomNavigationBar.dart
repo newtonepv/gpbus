@@ -11,6 +11,7 @@ class HomePageBottomNavigationBar extends StatelessWidget{
   Widget build(BuildContext context) {
     return BottomAppBar(
       height: 50,
+      padding: EdgeInsets.all(10),
       color: const Color(0xFFffc966),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -24,22 +25,6 @@ class HomePageBottomNavigationBar extends StatelessWidget{
                 onTap: onLocationIconTapped,
                 child: Icon(
                   Icons.location_on_rounded,
-                  size: iconSize,
-                  color: Colors.black,
-                ),
-              ),
-              InkWell(
-                onTap: () {},
-                child: Icon(
-                  Icons.directions_bus_rounded,
-                  size: iconSize,
-                  color: Colors.black,
-                ),
-              ),
-              InkWell(
-                onTap: () {},
-                child: Icon(
-                  Icons.access_time_rounded,
                   size: iconSize,
                   color: Colors.black,
                 ),

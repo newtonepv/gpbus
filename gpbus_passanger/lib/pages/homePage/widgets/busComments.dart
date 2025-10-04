@@ -1,31 +1,31 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:gpbus_passanger/singleton/userInfo.dart';
 import 'package:gpbus_passanger/utils/customExceptions/custom_server_exceptions.dart';
 import 'package:gpbus_passanger/utils/server_requests.dart';
 
 class Comments extends StatefulWidget{
-  final String password;
+  final UserInfo userInfo;
   final VoidCallback onCloseWidgetPressed;
-  final String userName;
   final int busId;
-  const Comments({super.key, required this.onCloseWidgetPressed, required this.busId, required this.userName, required this.password});
+  Comments({super.key, required this.onCloseWidgetPressed, required this.busId, required this.userInfo});
+  
   @override
   State<StatefulWidget> createState()=>_ComentsState();
 }
 class _ComentsState extends State<Comments>{
-  int busId=-1;
-  bool isloading=true;
+  int _busId=-1;
+  late UserInfo _userInfo;
 
   @override
   void initState() {
-    busId = widget.busId;
-    isloading=true;
-    //start croroutine
-
     super.initState();
+    _userInfo = widget.userInfo;
+    _busId = widget.busId;
   }
-
+  
   final GlobalKey<_CommentsListState> _commentsListKey = GlobalKey<_CommentsListState>();
   @override
   Widget build(BuildContext context){
@@ -67,7 +67,7 @@ class _ComentsState extends State<Comments>{
                       ),
                       Expanded(
                         child: Text(
-                          "Avaliações do ônibus ${busId.toString()}",
+                          "Avaliações do ônibus ${_busId.toString()}",
                           style: TextStyle(
                             color: const Color.fromARGB(255, 2, 1, 1),
                             fontSize: 20,
@@ -82,14 +82,14 @@ class _ComentsState extends State<Comments>{
                   ),
                 ),
                 SizedBox(height: 16),
-                CommentsList(key: _commentsListKey,busId: busId, userName: widget.userName),
+                CommentsList(key: _commentsListKey,busId: _busId, userName: _userInfo.name),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                   child: _CommentInput(
                     onCommentCreated: _commentsListKey.currentState?.fetchComments,
-                    userName: widget.userName,
-                    password: widget.password,
-                    busId: busId
+                    userName: _userInfo.name,
+                    password: _userInfo.password,
+                    busId: _busId
                   ),
                 ),
               ],
@@ -110,20 +110,29 @@ class CommentsList extends StatefulWidget{
   _CommentsListState createState() =>_CommentsListState();
 }
 class _CommentsListState extends State<CommentsList>{
-  List<Map<String,dynamic>> comments=[];
-  late int busId;
-  late String userName;
-  bool isloading=true;
+  List<Map<String,dynamic>> _comments=[];
+  late int _busId;
+  late String _userName;
+  bool _isloading=true;
+
+  final CancelToken _cancelGetBusComments = CancelToken();
+
+  @override 
+  void dispose(){
+    _cancelGetBusComments.cancel("disposed widget");
+    super.dispose();
+  }
+
 
   Future<void> fetchComments() async {
     setState(() {
-      isloading=true;
+      _isloading=true;
     });
     try{
-      List<Map<String,dynamic>> fetchedComments = await getBusComments(busId,userName,context);
+      List<Map<String,dynamic>> fetchedComments = await getBusComments(context, _busId,_userName,_cancelGetBusComments);
       setState(() {
-        comments=fetchedComments;
-        isloading=false;
+        _comments=fetchedComments;
+        _isloading=false;
       });
     }on CustomNavigatedToLoginPageException{
       //do nothing
@@ -131,22 +140,22 @@ class _CommentsListState extends State<CommentsList>{
   }
   @override
   void initState() {
-    busId = widget.busId;
-    userName = widget.userName;
+    _busId = widget.busId;
+    _userName = widget.userName;
     fetchComments();//start coroutine
     super.initState();
   }
 
   @override 
   Widget build(BuildContext context)=>
-  isloading
+  _isloading
     ? Center(
         child: Padding(
           padding: const EdgeInsets.all(32.0),
           child: CircularProgressIndicator(),
         ),
       )
-    : comments.isEmpty
+    : _comments.isEmpty
       ? Padding(
           padding: const EdgeInsets.all(16.0),
           child: Text(
@@ -157,9 +166,9 @@ class _CommentsListState extends State<CommentsList>{
       :  Flexible(
     child: ListView.builder(
       shrinkWrap: true,
-      itemCount: comments.length,
+      itemCount: _comments.length,
       itemBuilder: (context, index) {
-        return _CommentWidget(userName: userName,comment:comments[index],onLiked:fetchComments);
+        return _CommentWidget(userName: _userName,comment:_comments[index],onLiked:fetchComments);
       },
     )
   );
@@ -177,16 +186,15 @@ class _CommentWidget extends StatefulWidget {
 }
 
 class _CommentWidgetState extends State<_CommentWidget> {
-  late Map<String,dynamic> comment;
-  late String userName;
-  late Function onLiked;
-  
-
+  late Map<String,dynamic> _comment;
+  late String _userName;
+  late Function _onLiked;
+ 
   @override
   void initState() {
-    onLiked=widget.onLiked;
-    comment=widget.comment;
-    userName=widget.userName;
+    _onLiked=widget.onLiked;
+    _comment=widget.comment;
+    _userName=widget.userName;
     super.initState();
   }
 
@@ -207,7 +215,7 @@ Widget build(BuildContext context)=> Padding(
             Row(
               children: [
                 Text(
-                  comment['userName'] ?? '',
+                  _comment['userName'] ?? '',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -220,7 +228,7 @@ Widget build(BuildContext context)=> Padding(
                     (star) => Icon(
                       Icons.star,
                       size: 18,
-                      color: star < (comment['stars'] ?? 0)
+                      color: star < (_comment['stars'] ?? 0)
                           ? Colors.amber
                           : Colors.grey[300],
                     ),
@@ -230,7 +238,7 @@ Widget build(BuildContext context)=> Padding(
             ),
             SizedBox(height: 4),
             Text(
-              comment['message'] ?? '',
+              _comment['message'] ?? '',
               style: TextStyle(fontSize: 15),
             ),
             SizedBox(height: 8),
@@ -238,18 +246,18 @@ Widget build(BuildContext context)=> Padding(
               children: [
                 IconButton(onPressed: ()async{
                   int intercactionCode = 0; //turn into not dislike
-                  if(comment['userInteraction'] != 1){
+                  if(_comment['userInteraction'] != 1){
                     intercactionCode=1;//if the button isnt selected it turns into dislike
                   }
                   try{
-                    await likeComment(userName, comment['id'],intercactionCode,context);
-                    onLiked();
+                    await likeComment(context, _userName, _comment['id'],intercactionCode);
+                    _onLiked();
                   }on CustomNavigatedToLoginPageException{
                     //do nothing
                   }
                 }, 
                 icon: Icon(
-                    (comment['userInteraction'] == 1)
+                    (_comment['userInteraction'] == 1)
                         ? Icons.thumb_up_alt
                         : Icons.thumb_up_alt_outlined,
                     size: 16,
@@ -257,24 +265,24 @@ Widget build(BuildContext context)=> Padding(
                   ),
                 ),
                 SizedBox(width: 4),
-                Text('${comment['likes'] ?? 0}'),
+                Text('${_comment['likes'] ?? 0}'),
 
                 SizedBox(width: 16),
 
                 IconButton(onPressed: ()async{
                   int intercactionCode = 0; //turn into not dislike
-                  if(comment['userInteraction'] != -1){
+                  if(_comment['userInteraction'] != -1){
                     intercactionCode=-1;//if the button isnt selected it turns into dislike
                   }
                   try{
-                    await likeComment(userName, comment['id'],intercactionCode,context);
-                    onLiked();
+                    await likeComment(context, _userName, _comment['id'],intercactionCode);
+                    _onLiked();
                   }on CustomNavigatedToLoginPageException{
                     //do nothing
                   }
                 }, 
                 icon: Icon(
-                    (comment['userInteraction'] == -1)
+                    (_comment['userInteraction'] == -1)
                       ? Icons.thumb_down_alt
                       : Icons.thumb_down_alt_outlined,
                     size: 16,
@@ -283,11 +291,11 @@ Widget build(BuildContext context)=> Padding(
                 ),
                 
                 SizedBox(width: 4),
-                Text('${comment['disLikes'] ?? 0}'),
+                Text('${_comment['disLikes'] ?? 0}'),
                 Spacer(),
                 Text(
-                  comment['date'] != null
-                      ? comment['date'].toString().split('T').first
+                  _comment['date'] != null
+                      ? _comment['date'].toString().split('T').first
                       : '',
                   style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
@@ -364,7 +372,7 @@ class _CommentInputState extends State<_CommentInput> {
                   isLoading=true;
                 });
                 try{
-                  await createComment(widget.busId,widget.userName,widget.password, commentStarts,commentMsg,context);
+                  await createComment(context, widget.busId,widget.userName,widget.password, commentStarts,commentMsg);
                   widget.onCommentCreated!();
                   setState(() {
                     isLoading=false;

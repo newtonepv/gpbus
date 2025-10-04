@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:gpbus_passanger/pages/alarm_page.dart';
+import 'package:gpbus_passanger/pages/alarmPage/alarmPage.dart';
 import 'package:gpbus_passanger/pages/busBucks_page.dart';
 import 'package:gpbus_passanger/pages/config_page.dart';
+import 'package:gpbus_passanger/singleton/userInfo.dart';
 
-void showHomePageMenu(BuildContext context) {
+void showHomePageMenu(BuildContext context, UserInfo userInfo) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -80,11 +81,11 @@ void showHomePageMenu(BuildContext context) {
               }),
               _buildMenuItem(Icons.favorite, 'Favoritos', () {}),
               _buildMenuItem(Icons.alarm, 'Alarme', () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => AlarmPage()), // Navigate to AlarmPage
-          );
-        }),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) {return AlarmPage(userInfo:userInfo);} ), // Navigate to AlarmPage
+                  );
+                }),
               _buildMenuItem(Icons.star, 'Avaliações', () {}),
             ],
           ),

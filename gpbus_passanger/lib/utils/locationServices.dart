@@ -1,5 +1,7 @@
+
 import 'package:geolocator/geolocator.dart';
 import 'package:gpbus_passanger/utils/customExceptions/custom_location_exceptions.dart';
+
 
 Future<Position> getCurrentLocation() async {
   bool serviceEnabled = await Geolocator.isLocationServiceEnabled();

@@ -115,7 +115,7 @@ class _CreateAccountState extends State<CreateAccount> {
               return;
             }
             try{
-              await createUser(_userNameController.text, _passwordController.text,context);
+              await createUser(context, _userNameController.text, _passwordController.text);
               setState(() {
                 _infoTextMsg="Conta criada com sucesso";
                 _infoTextCode=1;

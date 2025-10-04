@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gpbus_passanger/pages/cadastro_page.dart';
 import 'package:gpbus_passanger/pages/esqueceu_page.dart';
 import 'package:gpbus_passanger/pages/homePage/homePage.dart';
+import 'package:gpbus_passanger/singleton/userInfo.dart';
 import 'package:gpbus_passanger/utils/customExceptions/custom_server_exceptions.dart';
 import 'package:gpbus_passanger/utils/server_requests.dart';
 import 'package:gpbus_passanger/utils/string_autentications.dart';
@@ -126,12 +127,12 @@ class _LoginPageState extends State<LoginPage> {
                   });
                   return;
                 }
-                //DEBUG 
                 try{
-                  bool hasAccess = await autenticateUser(userName,password, context);
+                  bool hasAccess = await autenticateUser(context,userName,password);
                   if(hasAccess){
+                    UserInfo userInfo = UserInfo(name: userName, password:password);
                     Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => HomePage(userName:userName,password: password)));
+                    MaterialPageRoute(builder: (context) => HomePage(userInfo:userInfo)));
                   }else {
                     setState(() {
                       errorMsg = "Usuário ou senha incorretos. Tente novamente.";

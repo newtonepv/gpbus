@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:gpbus_passanger/utils/changingPageFunctions.dart';
 import 'dart:async';
 import 'dart:convert';
-
+import 'package:gpbus_passanger/utils/alarm.dart';
 import 'package:gpbus_passanger/utils/customExceptions/custom_server_exceptions.dart';
 
 final Dio httpClient = Dio(); 
@@ -28,6 +28,7 @@ void handleServerFullError(DioException e, BuildContext context){
 }
 
 
+
 Future<List<int>> serverLoadBusIds(BuildContext context) async {
   //can return a DioException if its .response.statuscode = 502 the server is full, other exceptions are unexpected
   String path = host+"/busids";
@@ -41,7 +42,7 @@ Future<List<int>> serverLoadBusIds(BuildContext context) async {
   }
 }
 
-Future<List<double>> getBusLocation(CancelToken completer, int busid,BuildContext context) async{ 
+Future<List<double>> getBusLocation(BuildContext context, CancelToken completer, int busid) async{ 
   try{
     Response response =  await httpClient.get(host+'/getBusLoc/',
                 queryParameters: {
@@ -58,7 +59,7 @@ Future<List<double>> getBusLocation(CancelToken completer, int busid,BuildContex
   }
 }
 
-Future<List<List<double>>> getBusRoute(CancelToken completer, int busid,BuildContext context) async{ 
+Future<List<List<double>>> getBusRoute(BuildContext context, CancelToken completer, int busid) async{ 
   try{
     Response responses =  await httpClient.get(host+'/getBusRoute/',
                 queryParameters: {
@@ -87,7 +88,7 @@ Future<List<List<double>>> getBusRoute(CancelToken completer, int busid,BuildCon
   }
 }
 
-Future<bool> autenticateUser(String userName, String password,BuildContext context) async {
+Future<bool> autenticateUser(BuildContext context, String userName, String password) async {
   String path = host+"/authenticatePassanger/"; 
   try{
     var response = await httpClient.get(path,
@@ -112,7 +113,7 @@ void handle409Exception(DioException e, String msg){
   }
 }
 
-Future<void> createUser(String userName, String password,BuildContext context) async {
+Future<void> createUser(BuildContext context, String userName, String password) async {
   String path = host+"/createPassanger/"; 
   try{
     await httpClient.get(path,
@@ -142,18 +143,20 @@ Future<void> makeBus200Moove(BuildContext context) async {
 }
 
 
-Future<List<Map<String,dynamic>>> getBusComments(int busId, String userName,BuildContext context) async {
+Future<List<Map<String,dynamic>>> getBusComments(BuildContext context, int busId, String userName, CancelToken cancelGetBusComments) async {
   String path = host+"/getBusComments/"; 
   try{
     var response = await httpClient.get(path,
       queryParameters: {
         "busid":busId
-      });
+      },
+      cancelToken: cancelGetBusComments
+      );
     if(response.toString()!="[]"){
       List<String> commentsListUnparsed=transformStringToArray(response.toString());
       List<Map<String,dynamic>> commentListParsed = [];
       for(int i=0;i<commentsListUnparsed.length;i++){
-        commentListParsed.add( await commentDictParse(commentsListUnparsed[i],userName,context)); 
+        commentListParsed.add( await commentDictParse(context,commentsListUnparsed[i],userName)); 
       }
 
       return commentListParsed;
@@ -180,12 +183,12 @@ List<String> transformStringToArray(String input) {
   return objects;
 }
 
-Future<Map<String,dynamic>> commentDictParse(String str, String userName,BuildContext context)async{
+Future<Map<String,dynamic>> commentDictParse(BuildContext context, String str, String userName)async{
   List<String> unParsedBusComment = str.split(', ');
   Map<String,dynamic> commentDict = {};
   commentDict['id']= int.parse(unParsedBusComment[0].split(': ')[1]);
   //lets see if the user liked it
-  commentDict['userInteraction']=await getUserInteractionWithCommentAux(userName,commentDict['id'],context);
+  commentDict['userInteraction']=await getUserInteractionWithCommentAux(context, userName,commentDict['id']);
   commentDict['message']= unParsedBusComment[1].split(': ')[1];
   commentDict['stars']= int.parse(unParsedBusComment[2].split(': ')[1]);
   commentDict['userName']= unParsedBusComment[3].split(': ')[1];
@@ -195,7 +198,7 @@ Future<Map<String,dynamic>> commentDictParse(String str, String userName,BuildCo
   return commentDict;
 }
 
-Future<int> getUserInteractionWithCommentAux(String userName, int commentId, BuildContext context) async {
+Future<int> getUserInteractionWithCommentAux(BuildContext context,String userName, int commentId) async {
   //do not handle connection errors here because this is a aux function
   String path = host+"/checkIfUserLikedComment/"; 
     var response = await httpClient.get(path,
@@ -217,7 +220,7 @@ Future<int> getUserInteractionWithCommentAux(String userName, int commentId, Bui
     }
 }
 
-Future<void> likeComment(String userName, int commentId, int interactionCode, BuildContext context) async {
+Future<void> likeComment(BuildContext context, String userName, int commentId, int interactionCode) async {
   String path = host+"/likeComment/"; 
   try{
     await httpClient.get(path,
@@ -234,7 +237,7 @@ Future<void> likeComment(String userName, int commentId, int interactionCode, Bu
   }
 }
 
-Future<void> createComment(int busid, String userName,String password, int stars, String comment, BuildContext context) async {
+Future<void> createComment(BuildContext context, int busid, String userName,String password, int stars, String comment) async {
   String path = host+"/addBusComment/"; 
   try{
     await httpClient.get(path,
@@ -249,6 +252,73 @@ Future<void> createComment(int busid, String userName,String password, int stars
   }on DioException catch (e){
     handleConnectionError(e,context);
     handleServerFullError(e,context);//this should change DioException to make it more specific in case its a 502 exception
+    rethrow;
+  }
+}
+
+Future<List<Alarm>> getAlarms(BuildContext context, String userName, CancelToken cancelToken) async {
+  String path = host+"/getAlarms/"; 
+  try{
+    var response = await httpClient.get(path,
+      queryParameters: {
+        'username':userName
+      },
+      cancelToken: cancelToken
+    );
+    List<dynamic> rawAlarms = json.decode(response.toString())["alarms"];
+    List<Alarm> newAlarms=[];
+    for(int i=0;i<rawAlarms.length;i++){
+      dynamic r=rawAlarms[i];
+      final st_aux = DateTime.parse('1970-01-01 ' + r['start_time']);
+      final end_aux = DateTime.parse('1970-01-01 ' + r['end_time']);
+      TimeOfDay st = TimeOfDay.fromDateTime(st_aux);
+      TimeOfDay end = TimeOfDay.fromDateTime(end_aux);
+      
+      newAlarms.add(Alarm(r['alarm_id'], r['username'], r['busid'], st, end, r['c_latitude'], r['c_longitude'], r['c_radius']));
+    }
+    return newAlarms;
+  }on DioException catch (e){
+    handleConnectionError(e,context);
+    handleServerFullError(e,context);//this should change DioException to make it more specific in case its a 502 exception
+    rethrow;
+  }
+}
+
+Future<void> createAlarm(BuildContext context, String userName, String password, Alarm alarme) async {
+  String path = host + "/createAlarm/";
+  try {
+    await httpClient.get(path,
+      queryParameters: {
+        'username': userName,
+        'password': password,  // Changed from 'userName' to 'password'
+        'busid': alarme.busId,
+        'start_time': '${alarme.startTime.hour.toString().padLeft(2, '0')}:${alarme.startTime.minute.toString().padLeft(2, '0')}:00',
+        'end_time': '${alarme.endTime.hour.toString().padLeft(2, '0')}:${alarme.endTime.minute.toString().padLeft(2, '0')}:00',
+        'c_latitude': alarme.cLatitude,
+        'c_longitude': alarme.cLongitude,
+        'c_radius': alarme.radius,
+      }
+    );
+  } on DioException catch (e) {
+    handleConnectionError(e, context);
+    handleServerFullError(e, context);
+    rethrow;
+  }
+}
+
+Future<void> deleteAlarm(BuildContext context, String name, String password, int alarmId) async {
+  String path = host + '/deleteAlarm/';
+  try{
+    await httpClient.get(path,
+      queryParameters: {
+        'username': name,
+        'password': password,
+        'alarm_id': alarmId,
+      },
+    );
+  }on DioException catch (e) {
+    handleConnectionError(e, context);
+    handleServerFullError(e, context);
     rethrow;
   }
 }

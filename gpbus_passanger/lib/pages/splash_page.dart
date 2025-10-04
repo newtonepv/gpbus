@@ -6,7 +6,6 @@ class SplashPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //DEBUG
     Future.delayed(const Duration(seconds: 1)).then((_) {
       Navigator.pushReplacement(
         context,

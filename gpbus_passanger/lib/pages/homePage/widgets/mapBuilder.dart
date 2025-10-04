@@ -4,7 +4,17 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:gpbus_passanger/pages/homePage/widgets/mapWidget.dart';
 import 'package:latlong2/latlong.dart';
 
-Widget mapBuilder({List<List<double>>? route, List<double>? busLocationParam, bool focusBus=false, List<double>? userLocationParam, bool focusUser=false, required MapController mapController}){ 
+
+Widget mapBuilder({
+  List<List<double>>? route, 
+  List<double>? busLocationParam, 
+  bool focusBus = false, 
+  List<double>? userLocationParam, 
+  bool focusUser = false,  
+  bool? isForAlarms=false,
+  required MapController mapController,
+}) { 
+
   List<double> busLocation = [];
   List<double> userLocation = [];
   List<LatLng> points = [];
@@ -17,11 +27,9 @@ Widget mapBuilder({List<List<double>>? route, List<double>? busLocationParam, bo
   if(route!=null){
     points = route.map((p) => LatLng(p[0], p[1])).toList();
   }
-
+  
   List<Marker> markers = [];
-  /*if(route != null){
-    points = linhas.getRoute(route!);
-  }*/
+
   if(busLocation.isNotEmpty){
     markers.add(
       Marker(
@@ -42,15 +50,14 @@ Widget mapBuilder({List<List<double>>? route, List<double>? busLocationParam, bo
       Marker(
         width: 30.0,
         height: 30.0,
-        //DEBUG
-        point: LatLng(userLocation[0], userLocation[1]), 
+        point:  LatLng(userLocation[0], userLocation[1]), 
         child: Container(
           child: const Icon(Icons.location_pin, color: Colors.red),
         ),
       ) 
     );  
   }
-
+  
   if(focusUser==true&&userLocation.isNotEmpty){
     mapController.move(LatLng(userLocation[0],userLocation[1]), 16);
   }
@@ -58,4 +65,64 @@ Widget mapBuilder({List<List<double>>? route, List<double>? busLocationParam, bo
     mapController.move(LatLng(busLocation[0],busLocation[1]), 16);
   }
   return MapWidget(mapController: mapController, markers:markers, points: points);
+  
   }
+
+Widget MapBuilderForAlarms(
+  List<List<double>> route, 
+  List<double> busLocation, 
+  bool focusBus, 
+  Function() onPositionChanged,
+  double circleRadius,
+  MapController mapController,
+  ){ 
+
+  List<LatLng> points = [];
+  points = route.map((p) => LatLng(p[0], p[1])).toList();
+  List<Marker> markers = [];
+
+  markers.add(
+      Marker(
+        child: const Icon(
+        Icons.directions_bus,
+        color: Colors.orange,
+        size: 50,
+      ),
+      point: LatLng(busLocation[0], busLocation[1]),
+      height: 50,
+      width: 50,
+    ),
+    );
+
+  markers.add(
+    Marker(
+      width: circleRadius*2,
+      height: circleRadius*2,
+      point: focusBus?LatLng(busLocation[0], busLocation[1]):mapController.camera.center, 
+      child: Container(
+        width: 100,
+        height: 100,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.blue.withValues(alpha: 0.5), 
+        ),
+      )
+    ),
+  );
+  LatLng? initialCenter;
+  double initialZoom = 13.0; // default zoom
+  
+  if (focusBus) {
+    initialCenter = LatLng(busLocation[0], busLocation[1]);
+    initialZoom = 16.0;
+  }
+
+  return MapWidget(
+    mapController: mapController, 
+    markers: markers, 
+    points: points,
+    initialCenter: initialCenter,  // Pass this to MapWidget
+    initialZoom: initialZoom,       // Pass this to MapWidget
+    onPositionChanged: onPositionChanged
+  );
+}

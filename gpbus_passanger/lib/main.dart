@@ -5,7 +5,6 @@ import 'package:gpbus_passanger/pages/config_page.dart';
 import 'package:gpbus_passanger/pages/esqueceu_page.dart';
 import 'package:gpbus_passanger/pages/loginPage.dart';
 import 'package:gpbus_passanger/pages/splash_page.dart';
-import 'package:gpbus_passanger/pages/alarm_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -31,7 +30,6 @@ class MyApp extends StatelessWidget {
         '/esqueceu': (_) => const EsqueceuPage(),
         '/config': (_) => const ConfigPage(),
         '/busbucks':(_) => const BusBucks(),
-        'alarme':(_) => AlarmPage(),
       },
     );
   }
